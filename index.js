@@ -29,7 +29,7 @@ client.once('ready', () => {
             .setName('inactive')
             .setDescription('Gives a list of players who have playtimes below 2 hours'),
         new SlashCommandBuilder()
-            .setName('war')
+            .setName('war') 
             .setDescription('Checks how many wars a player did in the last week')
             .addStringOption(option => option.setName('username').setDescription('Enter the player\'s username').setRequired(true)),
         new SlashCommandBuilder()
