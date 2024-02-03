@@ -5,14 +5,15 @@ module.exports = {
     description: 'Select the user to accept into the guild and it will give them roles',
     async execute(interaction) {
         const user = interaction.options.getUser('user');
+        const minecraftUsername = interaction.options.getString('minecraft-username');
         const member = await interaction.guild.members.fetch(user.id);
-
+    
         const rolesToAddIds = process.env.ROLES_TO_ADD.split(',');
-
+    
         try {
             const rolesToAdd = [];
             const missingRoles = [];
-
+    
             rolesToAddIds.forEach(roleId => {
                 const role = interaction.guild.roles.cache.get(roleId.trim());
                 if (role) {
@@ -21,7 +22,7 @@ module.exports = {
                     missingRoles.push(roleId);
                 }
             });
-
+    
             if (rolesToAdd.length > 0) {
                 await member.roles.add(rolesToAdd);
                 let replyMessage = `${user.username} has been given the new roles.`;
@@ -32,9 +33,16 @@ module.exports = {
             } else {
                 await interaction.reply({ content: 'No roles were found to add.', ephemeral: true });
             }
+    
+            // Set the member's nickname to the provided Minecraft username
+            if (minecraftUsername) {
+                await member.setNickname(minecraftUsername);
+                await interaction.followUp({ content: `${user.username}'s nickname has been set to ${minecraftUsername}.`, ephemeral: true });
+            }
+    
         } catch (error) {
             console.error('Error handling acceptmember command:', error);
-            await interaction.reply({ content: 'An error occurred while modifying roles.', ephemeral: true });
+            await interaction.reply({ content: 'An error occurred while modifying roles or setting the nickname.', ephemeral: true });
         }
-    },
+    },    
 };

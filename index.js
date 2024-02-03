@@ -38,7 +38,8 @@ client.once('ready', () => {
         new SlashCommandBuilder()
             .setName('acceptmember')
             .setDescription('Select the user to accept into the guild and it will give them roles')
-            .addUserOption(option => option.setName('user').setDescription('Select the user who you want to accept').setRequired(true)),
+            .addUserOption(option => option.setName('user').setDescription('Select the user who you want to accept').setRequired(true))
+            .addStringOption(option => option.setName('minecraft-username').setDescription('Their in-game name').setRequired(true)),
         new SlashCommandBuilder()
             .setName('log')
             .setDescription('Logs the application in the ticket the command is run in'),

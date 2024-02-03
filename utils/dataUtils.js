@@ -1,11 +1,3 @@
-async function fetchMembersWithRole(guild, roleName) {
-    await guild.members.fetch(); 
-    const membersWithRole = guild.members.cache.filter(member =>
-        member.roles.cache.find(role => role.name === roleName)
-    );
-    return membersWithRole;
-}
-
 async function fetchPlayerData() {
     try {
         console.log('Fetching player data...');
@@ -76,48 +68,34 @@ async function fetchPlaytimeData() {
         let overallOldestEntryDate = oneWeekAgo;
 
         const groupedData = apiData.reduce((acc, item) => {
-            acc[item.username] = acc[item.username] || [];
-            acc[item.username].push(item);
+            acc[item.uuid] = acc[item.uuid] || [];
+            acc[item.uuid].push(item);
             return acc;
         }, {});
 
         let candidates = [];
 
-        for (const username in groupedData) {
-            const playerEntries = groupedData[username].sort((a, b) => new Date(a.insertion_timestamp) - new Date(b.insertion_timestamp));
+        for (const uuid in groupedData) {
+            const playerEntries = groupedData[uuid].sort((a, b) => new Date(a.insertion_timestamp) - new Date(b.insertion_timestamp));
             
-            // Check if the player's join date is less than 7 days ago
+            // Assuming playerEntries[0] is the oldest entry
             const joinDate = new Date(playerEntries[0].insertion_timestamp);
-            if (joinDate < oneWeekAgo) { // Proceed only if join date is at least 7 days old
+            if (joinDate < oneWeekAgo) {
                 let closestEntryToWeekAgo = playerEntries.reduce((prev, curr) => {
                     return (Math.abs(new Date(curr.insertion_timestamp) - oneWeekAgo) < Math.abs(new Date(prev.insertion_timestamp) - oneWeekAgo)) ? curr : prev;
                 });
-        
+
                 const playtimeChange = playerEntries[playerEntries.length - 1].playtime - closestEntryToWeekAgo.playtime;
         
-                if (playtimeChange < 2) { // less than 2 hours of playtime
-                    candidates.push({ username, playtimeChange });
+                if (playtimeChange < 2) {
+                    candidates.push({ uuid, playtimeChange });
                 }
             }
         }
 
-        // Fetch additional data from Wynncraft API for candidates
-        let filteredCandidates = await Promise.all(candidates.map(async (candidate) => {
-            try {
-                const wynncraftResponse = await axios.get(`https://api.wynncraft.com/v3/player/${candidate.username}`);
-                const guildName = wynncraftResponse.data?.guild?.name;
-                if (guildName === 'Aequitas') {
-                    return candidate;
-                }
-            } catch (error) {
-                //console.error(`Error fetching Wynncraft data for ${candidate.username}:`, error);
-            }
-        }));
-
-        filteredCandidates = filteredCandidates.filter(candidate => candidate !== undefined); // Remove undefined entries
-        console.log(`Processed data for ${filteredCandidates.length} players.`);
+        console.log(`Processed data for ${candidates.length} players.`);
         return { 
-            calculatedData: filteredCandidates.map(candidate => ({ username: candidate.username, playtimeChange: candidate.playtimeChange.toFixed(2) })), 
+            calculatedData: candidates.map(candidate => ({ uuid: candidate.uuid, playtimeChange: candidate.playtimeChange.toFixed(2) })), 
             timeRange: `From ${overallOldestEntryDate.toISOString().split('T')[0]} to ${newestEntryDate.toISOString().split('T')[0]}`
         };
     } catch (error) {
@@ -126,4 +104,36 @@ async function fetchPlaytimeData() {
     }
 }
 
-module.exports = { fetchPlayerData, fetchMembersWithRole, fetchPlaytimeData };
+async function getUsernameFromUUID(uuid) {
+    try {
+        console.log(`Fetching username for UUID: ${uuid}...`);
+        const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+        const response = await fetch('http://localhost:3001/api');
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const apiData = await response.json();
+        const userData = apiData.filter(entry => entry.uuid === uuid);
+
+        if (userData.length === 0) {
+            console.log(`No data found for UUID: ${uuid}`);
+            return null;
+        }
+
+        const mostRecentUser = userData.reduce((latest, current) => {
+            return new Date(latest.insertion_timestamp) > new Date(current.insertion_timestamp) ? latest : current;
+        });
+
+        console.log(`Username found for UUID: ${uuid} is ${mostRecentUser.username}`);
+        return mostRecentUser.username;
+    } catch (error) {
+        console.error(`Error fetching username for UUID ${uuid}:`, error);
+        return null;
+    }
+}
+
+
+
+module.exports = { fetchPlayerData, fetchPlaytimeData, getUsernameFromUUID};
