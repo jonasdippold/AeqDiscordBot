@@ -55,6 +55,10 @@ client.once('ready', () => {
             .setName('guild')
             .setDescription('Get data about a specific guild')
             .addStringOption(option => option.setName('guildname').setDescription('Enter the guild\'s name').setRequired(true)),
+        new SlashCommandBuilder()
+            .setName('findplayers')
+            .setDescription('Finds new players that we can recruit')
+            .addStringOption(option => option.setName('world').setDescription('Enter the world you want to check').setRequired(true)),
     ];
 
     commands.forEach(command => {

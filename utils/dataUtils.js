@@ -103,7 +103,7 @@ async function fetchPlaytimeData() {
         return { calculatedData: [], timeRange: '' };
     }
 }
-
+//Gets Minecraft Player Username from thier UUID
 async function getUsernameFromUUID(uuid) {
     try {
         console.log(`Fetching username for UUID: ${uuid}...`);
