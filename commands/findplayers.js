@@ -7,8 +7,9 @@ module.exports = {
     description: 'Finds new players that we can recruit',
     async execute(interaction) {
         const world = parseInt(interaction.options.getString('world'));
-        let server = world; // Replace with the server ID passed through the interaction, if applicable
-        console.log(`-------- Server ${server} --------`)
+        await interaction.deferReply();
+        let server = world;
+        console.log(`-------- Server ${server} --------`);
         let promises = [];
         let onlinePlayers = await getOnlinePlayers(server);
 
@@ -18,6 +19,7 @@ module.exports = {
 
         let playersDetailed = await Promise.all(promises);
 
+        let recruitmentMessages = '';
         for (let i = 0; i < playersDetailed.length; i++) {
             let player = playersDetailed[i];
 
@@ -30,25 +32,20 @@ module.exports = {
                 highestLevel = Math.max.apply(
                     Math,
                     Object.values(player.characters)
-                        .map(classData => {
-                            return classData.level
-                                ? classData.level
-                                : 0;
-                        })
+                        .map(classData => classData.level ? classData.level : 0)
                 );
             }
 
             if (player.guild === null && highestLevel >= 75) {
                 let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
-
-                const embed = new EmbedBuilder()
-                    .setColor('#0099ff')
-                    .setTitle('Recruitment Message')
-                    .setDescription(message)
-                    .setFooter({ text: `Player: ${player.username}` });
-
-                interaction.channel.send({ embeds: [embed] });
+                recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
             }
+        }
+
+        if (recruitmentMessages) {
+            await interaction.editReply(recruitmentMessages);
+        } else {
+            await interaction.editReply('No suitable players found for recruitment.');
         }
     }
 };

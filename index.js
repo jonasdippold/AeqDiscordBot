@@ -59,6 +59,9 @@ client.once('ready', () => {
             .setName('findplayers')
             .setDescription('Finds new players that we can recruit')
             .addStringOption(option => option.setName('world').setDescription('Enter the world you want to check').setRequired(true)),
+        new SlashCommandBuilder()
+            .setName('inactivewarn')
+            .setDescription('Gives a list of players who have playtimes below 2 hours without stating their playtime'),
     ];
 
     commands.forEach(command => {

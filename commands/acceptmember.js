@@ -7,6 +7,9 @@ module.exports = {
         const user = interaction.options.getUser('user');
         const minecraftUsername = interaction.options.getString('minecraft-username');
         const member = await interaction.guild.members.fetch(user.id);
+        const channelId = interaction.channelId;
+        const channel = interaction.client.channels.cache.get(channelId);
+
     
         const rolesToAddIds = process.env.ROLES_TO_ADD.split(',');
     
@@ -37,9 +40,10 @@ module.exports = {
             // Set the member's nickname to the provided Minecraft username
             if (minecraftUsername) {
                 await member.setNickname(minecraftUsername);
-                await interaction.followUp({ content: `${user.username}'s nickname has been set to ${minecraftUsername}.`, ephemeral: true });
+                await channel.send(`Congratulations <@${user.id}>, your application has been accepted! To join the guild, type \`/guild join Aeq\` in game!`)
+                //await interaction.followUp({ content: `Congratulations ${user.username}, your application has been accepted! To join the guild, type \`/guild join Aeq\` in game!`});
             }
-    
+            
         } catch (error) {
             console.error('Error handling acceptmember command:', error);
             await interaction.reply({ content: 'An error occurred while modifying roles or setting the nickname.', ephemeral: true });
