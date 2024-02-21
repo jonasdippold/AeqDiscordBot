@@ -41,7 +41,6 @@ module.exports = {
             if (minecraftUsername) {
                 await member.setNickname(minecraftUsername);
                 await channel.send(`Congratulations <@${user.id}>, your application has been accepted! To join the guild, type \`/guild join Aeq\` in game!`)
-                //await interaction.followUp({ content: `Congratulations ${user.username}, your application has been accepted! To join the guild, type \`/guild join Aeq\` in game!`});
             }
             
         } catch (error) {

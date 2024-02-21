@@ -37,15 +37,35 @@ module.exports = {
             const shouldGoToApplicationChannel = ticketBotMessage.content.includes('community') || ticketBotMessage.content.includes('guild application');
             const targetChannel = shouldGoToApplicationChannel ? pingChannelApplication : pingChannelPromotion;
     
+            const MAX_MESSAGE_LENGTH = 1989;
+
+            const sendChunkedMessages = async (channel, text) => {
+                for (let i = 0; i < text.length; i += MAX_MESSAGE_LENGTH) {
+                    // Ensuring each chunk, including Markdown syntax, is within the limit
+                    const end = Math.min(text.length, i + MAX_MESSAGE_LENGTH);
+                    const chunk = text.substring(i, end);
+                    await channel.send(`\`\`\`${chunk}\`\`\``);
+                }
+            };
+            
             if (logChannel) {
-                await logChannel.send(`\`\`\`${formattedLogMessages}\`\`\``);
                 await interaction.editReply('Your application is being reviewed!');
+                if (formattedLogMessages.length <= MAX_MESSAGE_LENGTH) {
+                    await logChannel.send(`\`\`\`${formattedLogMessages}\`\`\``);
+                } else {
+                    await sendChunkedMessages(logChannel, formattedLogMessages);
+                }
             } else {
                 await interaction.editReply('Log channel not found.');
             }
-    
+        
             if (targetChannel) {
-                await targetChannel.send(`@here`+`\`\`\`${formattedLogMessages}\`\`\``);
+                if (formattedLogMessages.length <= MAX_MESSAGE_LENGTH) {
+                    await targetChannel.send(`@here`+`\`\`\`${formattedLogMessages}\`\`\``);
+                } else {
+                    await targetChannel.send(`@here`)
+                    await sendChunkedMessages(targetChannel, formattedLogMessages);
+                }
             } else {
                 await interaction.editReply('Target ping channel not found.');
             }

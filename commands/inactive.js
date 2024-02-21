@@ -4,7 +4,7 @@ const { fetchPlaytimeData, getUsernameFromUUID } = require('../utils/dataUtils')
 
 module.exports = {
     name: 'inactive',
-    description: 'Gives a list of players who have playtimes below 2 hours',
+    description: 'Gives a list of players ordered by playtimes from lowest to highest',
     async execute(interaction) {
         await interaction.deferReply();
         const guild = interaction.guild;
@@ -23,10 +23,10 @@ module.exports = {
             const { calculatedData, timeRange } = await fetchPlaytimeData();
             await guild.members.fetch();
 
-            let warningMessage = '';
+            let playersList = [];
             for (const player of calculatedData) {
                 const playtime = parseFloat(player.playtimeChange);
-                if (!isNaN(playtime) && playtime < 2.0) {
+                if (!isNaN(playtime)) {
                     // Check guild membership in Wynncraft
                     await respectRateLimits();
                     const wynncraftResponse = await fetch(`https://api.wynncraft.com/v3/player/${player.uuid}`);
@@ -39,14 +39,14 @@ module.exports = {
                                 let discordMember = guild.members.cache.find(member => member.displayName.toLowerCase() === playerName.toLowerCase());
 
                                 if (discordMember) {
+                                    // Add player info to the list with Discord ID
                                     if (!discordMember.roles.cache.has(process.env.INACTIVE_ID) && discordMember.roles.cache.has(process.env.GUILD_MEMBER)) {
-                                        warningMessage += `<@${discordMember.id}> (${player.playtimeChange} hours) `;
-                                    } else {
-                                        console.log(`Member ${discordMember.displayName} excluded based on role criteria.`);
+                                        playersList.push({ name: playerName, playtime: playtime, mention: `<@${discordMember.id}>` });
                                     }
                                 } else {
-                                    warningMessage += `${playerName} (${player.playtimeChange} hours) `;
+                                    // Add player info to the list with just Minecraft name
                                     console.log(`No Discord member found for player: ${playerName}`);
+                                    playersList.push({ name: playerName, playtime: playtime, mention: playerName });
                                 }
                             }
                         }
@@ -54,11 +54,16 @@ module.exports = {
                 }
             }
 
-            if (warningMessage) {
-                warningMessage += 'You have been warned because **you haven\'t logged onto Wynncraft/hit the required playtime of 2 hours** during the last week without notice.\nIf you would like to stay in the guild please hit the required playtime in the next 48 hours or give us your reasoning in <#925856455658188860> or, if you prefer, DM one of the chiefs otherwise we will kick you.';
-                await interaction.editReply(warningMessage);
+            // Sort the list by playtime
+            playersList.sort((a, b) => a.playtime - b.playtime);
+
+            // Create a message from the sorted list
+            let message = playersList.map(player => `${player.mention} (${player.playtime} hours)`).join('\n');
+
+            if (message) {
+                await interaction.editReply(message);
             } else {
-                await interaction.editReply({ content: 'No players below 2 hours playtime.' });
+                await interaction.editReply({ content: 'No players found.' });
             }
         } catch (error) {
             console.error('Error handling playtime command:', error);
