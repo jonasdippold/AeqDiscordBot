@@ -102,6 +102,9 @@ client.once('ready', async () => {
         new SlashCommandBuilder()
             .setName('inactivewarn')
             .setDescription('Gives a list of players who have playtimes below 2 hours without stating their playtime'),
+        new SlashCommandBuilder()
+            .setName('leftguild')
+            .setDescription('List of players who left the guild'),
     ];
 
     commands.forEach(command => {

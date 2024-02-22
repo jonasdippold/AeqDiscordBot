@@ -1,7 +1,5 @@
 const { getOnlinePlayers, getPlayerInfo } = require('../utils/apirequests');
 
-const { EmbedBuilder } = require('discord.js');
-
 module.exports = {
     name: 'findplayers',
     description: 'Finds new players that we can recruit',
