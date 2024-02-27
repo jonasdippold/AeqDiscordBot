@@ -1,4 +1,26 @@
 const { getOnlinePlayers, getPlayerInfo } = require('../utils/apirequests');
+const fs = require('fs');
+const path = require('path');
+const playerdata = require('./players.json')
+
+function readPlayers() {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, 'players.json'), 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        console.error('Error reading from JSON file:', error);
+        return [];
+    }
+}
+
+// Function to write the updated list of players to the JSON file
+function writePlayers(players) {
+    try {
+        fs.writeFileSync(path.join(__dirname, 'players.json'), JSON.stringify(players, null, 4), 'utf8');
+    } catch (error) {
+        console.error('Error writing to JSON file:', error);
+    }
+}
 
 module.exports = {
     name: 'findplayers',
@@ -16,6 +38,9 @@ module.exports = {
         });
 
         let playersDetailed = await Promise.all(promises);
+
+        // Read the current list of players
+        let currentPlayers = readPlayers();
 
         let recruitmentMessages = '';
         for (let i = 0; i < playersDetailed.length; i++) {
@@ -35,10 +60,20 @@ module.exports = {
             }
 
             if (player.guild === null && highestLevel >= 75) {
-                let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
-                recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
+                // Check if the player has already been messaged
+                if (currentPlayers.includes(player.username)) {
+                    recruitmentMessages += `You have already messaged the player ${player.username}\n`;
+                } else {
+                    let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
+                    recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
+
+                    // Add player to the list
+                    currentPlayers.push(player.username);
+                }
             }
         }
+        
+        writePlayers(currentPlayers);
 
         if (recruitmentMessages) {
             await interaction.editReply(recruitmentMessages);

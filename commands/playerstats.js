@@ -87,7 +87,7 @@ module.exports = {
         } catch (error) {
             console.error("Error fetching data:", error.message);
             const embed = new EmbedBuilder()
-                .setColor(48, 25, 52)
+                .setColor(255, 211, 0)
                 .setTitle('Aequitas')
                 .setURL('https://aequitas.site/')
                 .setThumbnail(AEQ_LOGO)

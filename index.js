@@ -3,6 +3,8 @@ require('dotenv').config();
 const { Client, Collection, GatewayIntentBits, Events, SlashCommandBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { EmbedBuilder } = require('discord.js');
+const { AEQ_LOGO } = require('./utils/guildUtils');
 
 const client = new Client({
     intents: [
@@ -22,18 +24,6 @@ for (const file of commandFiles) {
     client.commands.set(command.name, command);
 }
 
-async function executeInactiveCommand() {
-    try {
-        const channel = await client.channels.fetch('1208687345063432272');
-        if (!channel) throw new Error("Channel not found");
-
-        // Here, add the logic for what you want the /inactive command to do.
-        const message = '/inactive'; // Replace with actual command logic
-        await channel.send(message);
-    } catch (error) {
-        console.error("Error executing the /inactive command: ", error);
-    }
-}
 const inactiveCommand = require('./commands/inactive.js');
 
 client.once('ready', async () => {
@@ -112,19 +102,16 @@ client.once('ready', async () => {
     });
 });
 
-client.on(Events.MessageCreate, async message => {
+/*client.on(Events.MessageCreate, async message => {
     console.log("Message received:", message.content);
     if (message.author.bot) return;
     if ((message.content.toLowerCase().includes('lalatera') || message.content.toLowerCase().includes('<:lala:1009089270604107857>')) && !message.author.bot) {
         await message.channel.send('Happy Birthday Lalatera!');
     }
-    //if ((message.content.toLowerCase().includes('woke') || message.content.toLowerCase().includes('<@1076085833116962926>')) && !message.author.bot) {
-    //    await message.channel.send('HELLO <@1076085833116962926>');
-    //}
     if ((message.content.toLowerCase().includes('barnus') || message.content.toLowerCase().includes('<@409289619369099305>')) && !message.author.bot) {
         await message.channel.send('i am <@409289619369099305> and im a simp for solo warring');
     }
-});
+});*/
 
 const allowedRoleIds = [process.env.ROLE_ID1, process.env.ROLE_ID2];
 client.on('interactionCreate', async interaction => {
