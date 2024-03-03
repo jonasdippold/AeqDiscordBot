@@ -95,6 +95,23 @@ client.once('ready', async () => {
         new SlashCommandBuilder()
             .setName('leftguild')
             .setDescription('List of players who left the guild'),
+            new SlashCommandBuilder()
+            .setName('blacklist')
+            .setDescription('Checks or adds players to the guild blacklist')
+            .addStringOption(option => 
+                option.setName('action')
+                    .setDescription('Choose to check or add a player to the blacklist')
+                    .setRequired(true)
+                    .addChoices(
+                        { name: 'check', value: 'check' },
+                        { name: 'remove', value: 'remove' },
+                        { name: 'add', value: 'add' },
+                        { name: 'list', value: 'list' }
+                    ))
+            .addStringOption(option => 
+                option.setName('username')
+                    .setDescription('Enter their Minecraft username')
+                    /*.setRequired(true)*/),
     ];
 
     commands.forEach(command => {

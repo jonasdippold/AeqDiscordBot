@@ -1,7 +1,6 @@
 const { getOnlinePlayers, getPlayerInfo } = require('../utils/apirequests');
 const fs = require('fs');
 const path = require('path');
-const playerdata = require('./players.json')
 
 function readPlayers() {
     try {
@@ -13,7 +12,6 @@ function readPlayers() {
     }
 }
 
-// Function to write the updated list of players to the JSON file
 function writePlayers(players) {
     try {
         fs.writeFileSync(path.join(__dirname, 'players.json'), JSON.stringify(players, null, 4), 'utf8');
@@ -38,45 +36,48 @@ module.exports = {
         });
 
         let playersDetailed = await Promise.all(promises);
-
-        // Read the current list of players
         let currentPlayers = readPlayers();
 
-        let recruitmentMessages = '';
+        let newRecruitmentMessages = '';
+        let alreadyMessagedPlayers = '';
         for (let i = 0; i < playersDetailed.length; i++) {
             let player = playersDetailed[i];
 
-            if (!player) {
-                continue;
-            }
+            if (!player) continue;
 
             let highestLevel = 0;
             if (player.hasOwnProperty("characters") && player.characters != null) {
                 highestLevel = Math.max.apply(
                     Math,
-                    Object.values(player.characters)
-                        .map(classData => classData.level ? classData.level : 0)
+                    player.characters.map(classData => classData.level || 0)
                 );
             }
 
             if (player.guild === null && highestLevel >= 75) {
-                // Check if the player has already been messaged
                 if (currentPlayers.includes(player.username)) {
-                    recruitmentMessages += `You have already messaged the player ${player.username}\n`;
+                    // Player already messaged, add to the already messaged list
+                    alreadyMessagedPlayers += `You have already messaged the player ${player.username}. Would you like to follow up? \n/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?\n\n`;
                 } else {
+                    // New player to message
                     let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
-                    recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
+                    newRecruitmentMessages += `\`\`\`${message}\`\`\`\n`;
 
-                    // Add player to the list
+                    // Add new player to the list
                     currentPlayers.push(player.username);
                 }
             }
         }
-        
+
         writePlayers(currentPlayers);
 
-        if (recruitmentMessages) {
-            await interaction.editReply(recruitmentMessages);
+        // Combine new and already messaged players' messages
+        let finalMessage = newRecruitmentMessages;
+        if (alreadyMessagedPlayers) {
+            finalMessage += "Players already messaged:\n" + alreadyMessagedPlayers;
+        }
+
+        if (finalMessage) {
+            await interaction.editReply(finalMessage);
         } else {
             await interaction.editReply('No suitable players found for recruitment.');
         }

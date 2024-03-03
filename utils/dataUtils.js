@@ -61,7 +61,7 @@ async function fetchPlaytimeData() {
         const apiData = await response.json();
         console.log(`Data fetched. Number of records: ${apiData.length}`);
 
-        const newestEntryDate = new Date(Math.max(...apiData.map(e => new Date(e.insertion_timestamp))));
+        const newestEntryDate = new Date(apiData.map(e => new Date(e.insertion_timestamp).getTime()).reduce((a, b) => Math.max(a, b)));
         let oneWeekAgo = new Date(newestEntryDate);
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -133,7 +133,5 @@ async function getUsernameFromUUID(uuid) {
         return null;
     }
 }
-
-
 
 module.exports = { fetchPlayerData, fetchPlaytimeData, getUsernameFromUUID};

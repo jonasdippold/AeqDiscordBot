@@ -31,7 +31,7 @@ module.exports = {
             var startDate = guildjoined.date;
             var datetime = new Date();
             const diffInMs = new Date(startDate) - new Date(datetime);
-            var diffInDays = !isNaN(diffInMs) ? Math.round(diffInMs / (1000 * 60 * 60 * 24)) : 'Date not available';
+            var diffInDays = !isNaN(diffInMs) ? Math.abs(Math.round(diffInMs / (1000 * 60 * 60 * 24))) : 'Date not available';
 
             var datefirstJoin = data.firstJoin ? await convertDate(data.firstJoin) : { date: 'Date not available' };
             var datelastJoin = data.lastJoin ? await convertDate(data.lastJoin) : { date: 'Date not available' };
