@@ -42,7 +42,7 @@ client.once('ready', async () => {
             inactiveCommand.execute(interaction);
         }
     });
-
+/*
     client.channels.fetch('1208687345063432272')
     .then(channel => {
         const interaction = {
@@ -53,7 +53,7 @@ client.once('ready', async () => {
         inactiveCommand.execute(interaction);
     })
         .catch(console.error);
-
+*/
     const commands = [
         new SlashCommandBuilder()
             .setName('inactive')
@@ -141,7 +141,7 @@ client.on('interactionCreate', async interaction => {
     const hasPermission = allowedRoleIds.some(roleId => memberRoles.has(roleId));
 
     if (!hasPermission) {
-        await interaction.reply({ content: "You do not have permission to use this command.", ephemeral: true });
+        await interaction.reply({ content: "You do not have permission to use this command.", ephemeral: true }).catch(console.error);
         return;
     }
 
@@ -149,8 +149,13 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction, client);
     } catch (error) {
         console.error(error);
-        await interaction.reply({ content: 'There was an error executing this command!', ephemeral: true });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: 'There was an error executing this command!', ephemeral: true }).catch(console.error);
+        } else {
+            await interaction.followUp({ content: 'There was an error executing this command!', ephemeral: true }).catch(console.error);
+        }
     }
 });
+
 
 client.login(process.env.TOKEN);

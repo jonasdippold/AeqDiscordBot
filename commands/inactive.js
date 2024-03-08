@@ -40,13 +40,13 @@ module.exports = {
                 const discordMember = guild.members.cache.find(member => member.displayName.toLowerCase() === playerName.toLowerCase());
                 if (!discordMember) {
                     console.log(`No Discord member found for player: ${playerName}`);
-                    return null; // or return an object to list them without mention
+                    return { name: playerName, playtime: parseFloat(player.playtimeChange), mention: playerName };
                 }
 
                 const playtime = parseFloat(player.playtimeChange);
                 if (isNaN(playtime)) return null;
 
-                if (discordMember.roles.cache.has(process.env.INACTIVE_ID) || !discordMember.roles.cache.has(process.env.GUILD_MEMBER)) return null;
+                if (discordMember.roles.cache.has(process.env.INACTIVE_ID) || !discordMember.roles.cache.has(process.env.GUILD_MEMBER_ID)) return null;
 
                 return { name: playerName, playtime: playtime, mention: `<@${discordMember.id}>` };
             };
@@ -54,7 +54,6 @@ module.exports = {
             const playerPromises = calculatedData.map(player => processPlayer(player));
             const playersList = (await Promise.all(playerPromises)).filter(player => player !== null);
             playersList.sort((a, b) => a.playtime - b.playtime);
-
             const message = playersList.map(player => `${player.mention} (${player.playtime} hours)`).join('\n') || 'No players found.';
 
             await interaction.editReply(message);

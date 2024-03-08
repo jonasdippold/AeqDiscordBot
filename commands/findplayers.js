@@ -1,6 +1,7 @@
 const { getOnlinePlayers, getPlayerInfo } = require('../utils/apirequests');
 const fs = require('fs');
 const path = require('path');
+const playerdata = require('./players.json')
 
 function readPlayers() {
     try {
@@ -12,6 +13,7 @@ function readPlayers() {
     }
 }
 
+// Function to write the updated list of players to the JSON file
 function writePlayers(players) {
     try {
         fs.writeFileSync(path.join(__dirname, 'players.json'), JSON.stringify(players, null, 4), 'utf8');
@@ -30,39 +32,41 @@ module.exports = {
         console.log(`-------- Server ${server} --------`);
         let promises = [];
         let onlinePlayers = await getOnlinePlayers(server);
-
         Object.keys(onlinePlayers.players).forEach((player) => {
             promises.push(getPlayerInfo(player));
         });
 
         let playersDetailed = await Promise.all(promises);
+
+        // Read the current list of players
         let currentPlayers = readPlayers();
 
-        let newRecruitmentMessages = '';
-        let alreadyMessagedPlayers = '';
+        let recruitmentMessages = '';
         for (let i = 0; i < playersDetailed.length; i++) {
             let player = playersDetailed[i];
-
-            if (!player) continue;
-
+            if (!player) {
+                continue;
+            }
             let highestLevel = 0;
             if (player.hasOwnProperty("characters") && player.characters != null) {
                 highestLevel = Math.max.apply(
                     Math,
-                    player.characters.map(classData => classData.level || 0)
+                    Object.values(player.characters)
+                        .map(classData => classData.level ? classData.level : 0)
                 );
             }
 
             if (player.guild === null && highestLevel >= 75) {
+                let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
+                recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
+                // Check if the player has already been messaged
                 if (currentPlayers.includes(player.username)) {
-                    // Player already messaged, add to the already messaged list
-                    alreadyMessagedPlayers += `You have already messaged the player ${player.username}. Would you like to follow up? \n/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?\n\n`;
+                    recruitmentMessages += `You have already messaged the player ${player.username}\n`;
                 } else {
-                    // New player to message
                     let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
-                    newRecruitmentMessages += `\`\`\`${message}\`\`\`\n`;
+                    recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
 
-                    // Add new player to the list
+                    // Add player to the list
                     currentPlayers.push(player.username);
                 }
             }
@@ -70,14 +74,8 @@ module.exports = {
 
         writePlayers(currentPlayers);
 
-        // Combine new and already messaged players' messages
-        let finalMessage = newRecruitmentMessages;
-        if (alreadyMessagedPlayers) {
-            finalMessage += "Players already messaged:\n" + alreadyMessagedPlayers;
-        }
-
-        if (finalMessage) {
-            await interaction.editReply(finalMessage);
+        if (recruitmentMessages) {
+            await interaction.editReply(recruitmentMessages);
         } else {
             await interaction.editReply('No suitable players found for recruitment.');
         }
