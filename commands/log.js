@@ -41,7 +41,6 @@ module.exports = {
 
             const sendChunkedMessages = async (channel, text) => {
                 for (let i = 0; i < text.length; i += MAX_MESSAGE_LENGTH) {
-                    // Ensuring each chunk, including Markdown syntax, is within the limit
                     const end = Math.min(text.length, i + MAX_MESSAGE_LENGTH);
                     const chunk = text.substring(i, end);
                     await channel.send(`\`\`\`${chunk}\`\`\``);

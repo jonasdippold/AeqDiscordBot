@@ -13,7 +13,6 @@ function readPlayers() {
     }
 }
 
-// Function to write the updated list of players to the JSON file
 function writePlayers(players) {
     try {
         fs.writeFileSync(path.join(__dirname, 'players.json'), JSON.stringify(players, null, 4), 'utf8');
@@ -38,7 +37,7 @@ module.exports = {
 
         let playersDetailed = await Promise.all(promises);
 
-        // Read the current list of players
+        // read the current list of players
         let currentPlayers = readPlayers();
 
         let recruitmentMessages = '';
@@ -57,21 +56,18 @@ module.exports = {
             }
 
             if (player.guild === null && highestLevel >= 75) {
-                let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
-                recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
-                // Check if the player has already been messaged
-                if (currentPlayers.includes(player.username)) {
-                    recruitmentMessages += `You have already messaged the player ${player.username}\n`;
-                } else {
-                    let message = `/msg ${player.username} Hello, how is it going? Are you maybe looking for a guild?`;
-                    recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
-
+                let message = `/msg ${player.username} Hey, how's it going? Are you perhaps looking for a guild?`;
+                
+                // check if the player has already been messaged
+                if (!currentPlayers.includes(player.username)) {
                     // Add player to the list
                     currentPlayers.push(player.username);
+                    recruitmentMessages += `\`\`\`${message}\`\`\`\n`;
+                } else {
+                    recruitmentMessages += `You have already messaged the player ${player.username}\n`;
                 }
             }
         }
-
         writePlayers(currentPlayers);
 
         if (recruitmentMessages) {

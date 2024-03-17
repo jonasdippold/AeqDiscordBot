@@ -78,7 +78,6 @@ async function fetchPlaytimeData() {
         for (const uuid in groupedData) {
             const playerEntries = groupedData[uuid].sort((a, b) => new Date(a.insertion_timestamp) - new Date(b.insertion_timestamp));
             
-            // Assuming playerEntries[0] is the oldest entry
             const joinDate = new Date(playerEntries[0].insertion_timestamp);
             if (joinDate < oneWeekAgo) {
                 let closestEntryToWeekAgo = playerEntries.reduce((prev, curr) => {
@@ -103,7 +102,7 @@ async function fetchPlaytimeData() {
         return { calculatedData: [], timeRange: '' };
     }
 }
-//Gets Minecraft Player Username from thier UUID
+//gets username from thier uuid
 async function getUsernameFromUUID(uuid) {
     try {
         console.log(`Fetching username for UUID: ${uuid}...`);

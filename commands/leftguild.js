@@ -9,7 +9,7 @@ module.exports = {
         const guild = interaction.guild;
 
         try {
-            // Fetch Wynncraft guild members
+            // fetch Wynncraft guild members
             const wynncraftResponse = await fetch('https://api.wynncraft.com/v3/guild/Aequitas');
             if (!wynncraftResponse.ok) {
                 throw new Error('Failed to fetch Wynncraft guild members');
@@ -23,12 +23,10 @@ module.exports = {
             }
             function extractMembers(category) {
                 if (Array.isArray(category)) {
-                    // If category is an array
                     for (const member of category) {
                         wynncraftMembers.push(member.name.toLowerCase());
                     }
                 } else {
-                    // If category is an object
                     for (const memberName in category) {
                         if (category.hasOwnProperty(memberName)) {
                             wynncraftMembers.push(memberName.toLowerCase());
@@ -43,22 +41,20 @@ module.exports = {
                 }
             }
             
-            // Fetch Discord members with the specific role
-            const discordRoleID = process.env.GUILD_MEMBER; // ID of the Wynncraft guild role in Discord
+            // fetch Discord members with the specific role
+            const discordRoleID = process.env.GUILD_MEMBER; 
             await guild.members.fetch();
             let discordMembers = guild.members.cache.filter(member => member.roles.cache.has(discordRoleID));
             let message = '';
             
             let removedIDs = process.env.IGNORE_IDS.split(',');
 
-            // Compare the lists and find members who have left
+            // compare the lists and find members who have left
             discordMembers.forEach(member => {
                 if (!wynncraftMembers.includes(member.displayName.toLowerCase()) && (!removedIDs.includes(member.id))) {
                     message += `<@${member.id}> `;
                 }
             });
-
-            // Send the message
             await interaction.editReply(message);
 
         } catch (error) {

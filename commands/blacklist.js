@@ -23,7 +23,6 @@ function readBlacklist() {
 
 function writeBlacklist(data) {
     try {
-        // Save data as is, assuming data is already processed to be lowercase
         fs.writeFileSync(blacklistFilePath, JSON.stringify(data, null, 4), 'utf8');
         console.log(`Blacklist updated successfully.`);
     } catch (error) {
@@ -38,12 +37,12 @@ module.exports = {
     async execute(interaction) {
         try {
             await interaction.deferReply();
-            const action = interaction.options.getString('action').toLowerCase(); // Ensure action is lowercase
+            const action = interaction.options.getString('action').toLowerCase(); 
             const blacklist = readBlacklist();
             if (['check', 'add', 'remove'].includes(action)) {
-                username = interaction.options.getString('username').toLowerCase(); // Ensure we have username for these actions
+                username = interaction.options.getString('username').toLowerCase(); 
             }
-            
+
             if (action === 'check') {
                 if (blacklist.includes(username)) {
                     await interaction.followUp(`${username} is on the blacklist.`);
@@ -54,7 +53,7 @@ module.exports = {
                 if (blacklist.includes(username)) {
                     await interaction.followUp(`${username} is already on the blacklist.`);
                 } else {
-                    blacklist.push(username); // Username is already in lowercase
+                    blacklist.push(username);
                     writeBlacklist(blacklist);
                     await interaction.followUp(`${username} has been added to the blacklist.`);
                 }
@@ -68,7 +67,6 @@ module.exports = {
                     await interaction.followUp(`${username} is not on the blacklist.`);
                 }
             } else if (action === 'list') {
-                // Logic to send the blacklist as a text file
                 const blacklistPath = path.join(__dirname, 'blacklist.json');
                 const data = fs.readFileSync(blacklistPath, 'utf8');
                 const attachment = new AttachmentBuilder(Buffer.from(data, 'utf-8'), { name: 'blacklist.txt' });

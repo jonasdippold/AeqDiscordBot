@@ -37,7 +37,7 @@ module.exports = {
                 await interaction.reply({ content: 'No roles were found to add.', ephemeral: true });
             }
     
-            // Set the member's nickname to the provided Minecraft username
+            // set discord nickname to mc username
             if (minecraftUsername) {
                 await member.setNickname(minecraftUsername);
                 await channel.send(`Congratulations <@${user.id}>, your application has been accepted! To join the guild, type \`/guild join Aeq\` in game!`)

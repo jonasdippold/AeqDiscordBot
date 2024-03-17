@@ -8,13 +8,12 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply();
         const guild = interaction.guild;
-        const wynncraftRateLimit = 180; // Max calls per minute
+        const wynncraftRateLimit = 180; 
         let wynncraftCalls = 0;
 
-        // Function to respect rate limits
         const respectRateLimits = async () => {
             if (wynncraftCalls >= wynncraftRateLimit) {
-                await new Promise(resolve => setTimeout(resolve, 60000)); // Wait for 1 minute
+                await new Promise(resolve => setTimeout(resolve, 60000)); 
                 wynncraftCalls = 0;
             }
         };
@@ -27,7 +26,6 @@ module.exports = {
             for (const player of calculatedData) {
                 const playtime = parseFloat(player.playtimeChange);
                 if (!isNaN(playtime) && playtime < 2.0) {
-                    // Check guild membership in Wynncraft
                     await respectRateLimits();
                     const wynncraftResponse = await fetch(`https://api.wynncraft.com/v3/player/${player.uuid}`);
                     wynncraftCalls++;
