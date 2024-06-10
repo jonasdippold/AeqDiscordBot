@@ -1,4 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 require('dotenv').config();
 
 module.exports = {
@@ -21,6 +21,7 @@ module.exports = {
             if (!wynncraftData.members) {
                 throw new Error('No members data in Wynncraft response');
             }
+
             function extractMembers(category) {
                 if (Array.isArray(category)) {
                     for (const member of category) {
@@ -55,6 +56,11 @@ module.exports = {
                     message += `<@${member.id}> `;
                 }
             });
+
+            // check if message is empty
+            if (message === '') {
+                message = 'No players found';
+            }
             await interaction.editReply(message);
 
         } catch (error) {
