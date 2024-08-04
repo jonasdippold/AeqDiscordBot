@@ -133,4 +133,14 @@ async function getUsernameFromUUID(uuid) {
     }
 }
 
-module.exports = { fetchPlayerData, fetchPlaytimeData, getUsernameFromUUID};
+async function getHypixelFirstLogin(uuid) {
+    const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+    const response = await fetch(`https://api.hypixel.net/player?key=9de7756a-1dbf-40d3-a8bd-a944b3266d66&uuid=${uuid}`);
+    const data = await response.json();
+    if (data && data.player && data.player.firstLogin) {
+        return new Date(data.player.firstLogin);
+    }
+    return null;
+}
+
+module.exports = {getHypixelFirstLogin, fetchPlayerData, fetchPlaytimeData, getUsernameFromUUID};

@@ -20,7 +20,7 @@ async function getOnlinePlayers(server) {
 
 async function getPlayerInfo(username) {
     try {
-        console.log(`Fetching info for player: ${username}...`);
+        console.log(`Fetching info for player: ${username}...`); t
         const response = await fetch(`https://api.wynncraft.com/v3/player/${username}?fullResult=True`);
 
         if (!response.ok) {

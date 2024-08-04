@@ -95,7 +95,7 @@ client.once('ready', async () => {
         new SlashCommandBuilder()
             .setName('leftguild')
             .setDescription('List of players who left the guild'),
-            new SlashCommandBuilder()
+        new SlashCommandBuilder()
             .setName('blacklist')
             .setDescription('Checks or adds players to the guild blacklist')
             .addStringOption(option => 
@@ -112,6 +112,10 @@ client.once('ready', async () => {
                 option.setName('username')
                     .setDescription('Enter their Minecraft username')
                     /*.setRequired(true)*/),
+        new SlashCommandBuilder()
+            .setName('sus')
+            .setDescription('Finds how suspicious a player is')
+            .addStringOption(option => option.setName('player').setDescription('Players name').setRequired(true)),
     ];
 
     commands.forEach(command => {
