@@ -55,7 +55,7 @@ module.exports = {
                 );
             }
 
-            if (player.guild === null && highestLevel >= 75) {
+            if (player.guild === null && highestLevel >= 95) {
                 let message = `/msg ${player.username} Hey, how's it going? Are you perhaps looking for a guild?`;
                 
                 // check if the player has already been messaged
